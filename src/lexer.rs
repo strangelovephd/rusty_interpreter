@@ -1,10 +1,10 @@
-use crate::tokens::*;
+use crate::token::*;
 
 pub struct Lexer {
     input: String,          //
     position: usize,        // current position in input (points to current char)
     read_position: usize,   // current reading position in input (after current char)
-    ch: byte,               // current char under examination
+    ch: u8,               // current char under examination
 }
 
 impl Lexer {
@@ -54,15 +54,15 @@ mod tests {
     fn NextTokentest() {
         let input = "=+(){},;";
         let tests: Vec<Token> = vec![
-            Token {tokentype: tokens::ASSIGN, literal: "="},
-            Token {tokentype: tokens::PLUS, literal: "+"},
-            Token {tokentype: tokens::LPAREN, literal: "("},
-            Token {tokentype: tokens::RPAREN, literal: ")"},
-            Token {tokentype: tokens::LBRACE, literal: "{"},
-            Token {tokentype: tokens::RBRACE, literal: "}"},
-            Token {tokentype: tokens::COMMA, literal: ","},
-            Token {tokentype: tokens::SEMICOLON, literal: ";"},
-            Token {tokentype: tokens::EOF, literal: ""},
+            Token {tokentype: ASSIGN, literal: "="},
+            Token {tokentype: PLUS, literal: "+"},
+            Token {tokentype: LPAREN, literal: "("},
+            Token {tokentype: RPAREN, literal: ")"},
+            Token {tokentype: LBRACE, literal: "{"},
+            Token {tokentype: RBRACE, literal: "}"},
+            Token {tokentype: COMMA, literal: ","},
+            Token {tokentype: SEMICOLON, literal: ";"},
+            Token {tokentype: EOF, literal: ""},
         ];
 
         let l = Lexer::new(input);
