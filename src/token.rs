@@ -30,8 +30,8 @@ pub struct LexerError {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
-    tokentype: TokenType,
-    literal: String,
+    pub tokentype: TokenType,
+    pub literal: String,
 }
 
 impl Token {
@@ -43,7 +43,7 @@ impl Token {
     }
 }
 
-mod tokens {
+pub mod tokens {
     pub const ILLEGAL: &str = "ILLEGAL";
     pub const EOF: &str = "EOF";
 

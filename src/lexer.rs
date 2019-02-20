@@ -21,26 +21,26 @@ impl Lexer {
         if self.read_position >= self.input.len() {
             self.ch = 0;
         } else {
-            self.ch = self.input[self.read_position];
+            self.ch = self.input.as_bytes()[self.read_position];
         }
         self.position = self.read_position;
         self.read_position += 1;
     }
 
     pub fn next_token(&mut self) -> Token {
-        let mut tok = match self.ch {
-            '=' => Token::new(tokens::ASSIGN, self.ch),
-            ';' => Token::new(tokens::SEMICOLON, self.ch),
-            '(' => Token::new(tokens::LPAREN, self.ch),
-            ')' => Token::new(tokens::RPAREN, self.ch),
-            ',' => Token::new(tokens::COMMA, self.ch),
-            '+' => Token::new(tokens::PLUS, self.ch),
-            '{' => Token::new(tokens::LBRACE, self.ch),
-            '}' => Token::new(tokens::RBRACE, self.ch),
-            0 =>   Token {literal: "", tokentype: tokens::EOF,
+        let mut tok = match self.ch as char {
+            '=' => Token::new(tokens::ASSIGN.to_string(), self.ch.to_string()),
+            ';' => Token::new(tokens::SEMICOLON.to_string(), self.ch.to_string()),
+            '(' => Token::new(tokens::LPAREN.to_string(), self.ch.to_string()),
+            ')' => Token::new(tokens::RPAREN.to_string(), self.ch.to_string()),
+            ',' => Token::new(tokens::COMMA.to_string(), self.ch.to_string()),
+            '+' => Token::new(tokens::PLUS.to_string(), self.ch.to_string()),
+            '{' => Token::new(tokens::LBRACE.to_string(), self.ch.to_string()),
+            '}' => Token::new(tokens::RBRACE.to_string(), self.ch.to_string()),
+            //'\0' =>   Token::new("".to_string(), tokens::EOF.to_string()),
             _ => panic!("Error: invalid token"),
-            }
-        }
+            };
+        
 
         self.read_char();
         tok
@@ -50,27 +50,30 @@ impl Lexer {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
-    fn NextTokentest() {
+    fn next_token_test() {
         let input = "=+(){},;";
         let tests: Vec<Token> = vec![
-            Token {tokentype: ASSIGN, literal: "="},
-            Token {tokentype: PLUS, literal: "+"},
-            Token {tokentype: LPAREN, literal: "("},
-            Token {tokentype: RPAREN, literal: ")"},
-            Token {tokentype: LBRACE, literal: "{"},
-            Token {tokentype: RBRACE, literal: "}"},
-            Token {tokentype: COMMA, literal: ","},
-            Token {tokentype: SEMICOLON, literal: ";"},
-            Token {tokentype: EOF, literal: ""},
+            Token {tokentype: tokens::ASSIGN.to_string(), literal: "=".to_string()},
+            Token {tokentype: tokens::PLUS.to_string(), literal: "+".to_string()},
+            Token {tokentype: tokens::LPAREN.to_string(), literal: "(".to_string()},
+            Token {tokentype: tokens::RPAREN.to_string(), literal: ")".to_string()},
+            Token {tokentype: tokens::LBRACE.to_string(), literal: "{".to_string()},
+            Token {tokentype: tokens::RBRACE.to_string(), literal: "}".to_string()},
+            Token {tokentype: tokens::COMMA.to_string(), literal: ",".to_string()},
+            Token {tokentype: tokens::SEMICOLON.to_string(), literal: ";".to_string()},
+            Token {tokentype: tokens::EOF.to_string(), literal: "".to_string()},
         ];
 
-        let l = Lexer::new(input);
+        let mut l = Lexer::new(input.to_string());
 
-        for (i, t) in tests.into_iter().enumerate() {
+        for t in tests.into_iter() {
+            
             let tok = l.next_token();
-
-            assert_eq!(tok, tests[i]);
+            println!("lexer: {:?}", tok);
+            println!("test: {:?}", t);
+            assert_eq!(tok, t);
         }
     
     
