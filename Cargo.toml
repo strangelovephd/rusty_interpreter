@@ -1,0 +1,7 @@
+[package]
+name = "rusty_interpreter"
+version = "0.1.0"
+authors = ["sisyphus"]
+edition = "2018"
+
+[dependencies]
