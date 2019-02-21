@@ -1,32 +1,35 @@
 
-type TokenType = String;
+//type TokenType = String;
 
 pub struct LexerError {
     line: usize,
-
+    token: TokenType,
 }
 
-//pub enum _TokenType {
-//    Illegal(String),
-//    EOF,
-//    // Identifiers and literals:
-//    IDENT(String),
-//    Int(i32),
-//    // Operators
-//    Assign,
-//    Plus,
-//    // Delimiters
-//    Comma,
-//    Semicolon,
-//    Lparen,
-//    Rparen,
-//    Lbrace,
-//    Rbrace,
-//
-//    // Keywords
-//    Function,
-//    Let,
-//}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum TokenType {
+    Illegal(String),
+    EOF,
+
+    // Identifiers and literals:
+    Ident(String),
+    Int(i32),
+
+    // Operators
+    Assign,
+    Plus,
+    // Delimiters
+    Comma,
+    Semicolon,
+    Lparen,
+    Rparen,
+    Lbrace,
+    Rbrace,
+
+    // Keywords
+    Function,
+    Let,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
