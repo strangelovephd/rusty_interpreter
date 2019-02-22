@@ -1,14 +1,14 @@
 use crate::token::*;
 
 pub struct Lexer {
-    input: String,          
+    input: Vec<u8>,          
     position: usize,        // current position in input (points to current char)
     read_position: usize,   // current reading position in input (after current char)
     ch: char,               // current char under examination
 }
 
 impl Lexer {
-    pub fn new(i: String) -> Lexer {
+    pub fn new(i: Vec<u8>) -> Lexer {
         let mut l = Lexer {
             input: i,
             position: 0,
@@ -23,7 +23,7 @@ impl Lexer {
         if self.read_position >= self.input.len() {
             self.ch = '\0';
         } else {
-            self.ch = self.input.as_bytes()[self.read_position] as char;
+            self.ch = self.input[self.read_position] as char;
         }
         self.position = self.read_position;
         self.read_position += 1;
@@ -47,6 +47,23 @@ impl Lexer {
         self.read_char();
         tok
     }
+
+    fn is_letter(ch: &u8) -> bool {
+      //'a'                   'z'      'A'                   'Z'            '_'
+        97u8 <= *ch && *ch <= 122u8 || 65u8 <= *ch && *ch <= 90u8 || *ch == 95u8
+    }
+
+    fn is_char(ch: &char) -> bool {
+        'a' <= *ch && *ch <= 'z' || 'A' <= *ch && *ch <= 'Z' || *ch == '_'
+    }
+
+    fn read_identifier(&mut self) -> String {
+        let position = self.position;
+        while Self::is_char(&self.ch) {
+            self.read_char(); 
+        }
+        String::from_utf8(self.input[position..self.position].to_vec()).expect("Unable to create String")
+    }
 }
 
 
@@ -55,7 +72,8 @@ mod tests {
     use super::*;
     #[test]
     fn next_token_test() {
-        let input = "=+(){},;";
+        let input = "=+(){},;".as_bytes().to_vec();
+        
         let tests: Vec<Token> = vec![
             Token {tokentype: TokenType::Assign, literal: "=".to_string()},
             Token {tokentype: TokenType::Plus, literal: "+".to_string()},
@@ -68,7 +86,7 @@ mod tests {
             Token {tokentype: TokenType::EOF, literal: "EOF".to_string()},
         ];
 
-        let mut l = Lexer::new(input.to_string());
+        let mut l = Lexer::new(input);
 
         for t in tests.into_iter() {
             let tok = l.next_token();
@@ -88,7 +106,7 @@ mod tests {
             x + y;
         };
         
-        let result = add(five, ten);".to_string();
+        let result = add(five, ten);".as_bytes().to_vec();
 
         let tests: Vec<Token> = vec![
             Token::new(TokenType::Let, "let".to_string()),
