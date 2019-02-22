@@ -30,7 +30,7 @@ impl Lexer {
     }
 
     pub fn next_token(&mut self) -> Token {
-        let tok = match self.ch as char {
+        let tok = match self.ch {
             '=' => Token::new(TokenType::Assign, "=".to_string()),
             ';' => Token::new(TokenType::Semicolon, ";".to_string()),
             '(' => Token::new(TokenType::Lparen, "(".to_string()),
@@ -39,8 +39,15 @@ impl Lexer {
             '+' => Token::new(TokenType::Plus, "+".to_string()),
             '{' => Token::new(TokenType::Lbrace, "{".to_string()),
             '}' => Token::new(TokenType::Rbrace, "}".to_string()),
-            '\0' =>   Token::new(TokenType::EOF, tokens::EOF.to_string()),
-            _ => panic!("Error: invalid token"),
+            '\0' => Token::new(TokenType::EOF, tokens::EOF.to_string()),
+            _ => {
+                if Lexer::is_char(&self.ch) {
+                    let literal = self.read_identifier();
+                    Token::new(TokenType::Ident(literal.clone()), literal)
+                } else {
+                    Token::new(TokenType::Illegal(String::new()), String::new())
+                }
+            }
             };
         
 

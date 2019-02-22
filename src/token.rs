@@ -31,6 +31,7 @@ pub enum TokenType {
     Let,
 }
 
+// TODO: Change to just enum?
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
     pub tokentype: TokenType,
@@ -45,6 +46,8 @@ impl Token {
         }
     }
 }
+
+
 
 pub mod tokens {
     pub const ILLEGAL: &str = "ILLEGAL";
