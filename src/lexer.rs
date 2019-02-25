@@ -1,5 +1,7 @@
 use crate::token::*;
 
+
+
 pub struct Lexer {
     input: Vec<u8>,          
     position: usize,        // current position in input (points to current char)
@@ -27,9 +29,12 @@ impl Lexer {
         }
         self.position = self.read_position;
         self.read_position += 1;
+        println!("Read: {}", self.ch);
     }
 
-    pub fn next_token(&mut self) -> Token {
+/*     pub fn _next_token(&mut self) -> Token {
+        self.skip_whitespace();
+
         let tok = match self.ch {
             '=' => Token::new(TokenType::Assign, "=".to_string()),
             ';' => Token::new(TokenType::Semicolon, ";".to_string()),
@@ -43,9 +48,21 @@ impl Lexer {
             _ => {
                 if Lexer::is_char(&self.ch) {
                     let literal = self.read_identifier();
-                    Token::new(TokenType::Ident(literal.clone()), literal)
+                    let kw = match look_up_keyword(&literal) {
+                        Some(kw) => {
+                            match kw {
+                                Keyword::Function => TokenType::Function,
+                                Keyword::Let => TokenType::Let,
+                            }
+                        },
+                        None => TokenType::IllegalIdent(literal.clone()),
+                    };
+
+                    Token::new(kw, literal)
+                } else if Lexer::is_digit(&self.ch) {
+                    Token::new(TokenType)
                 } else {
-                    Token::new(TokenType::Illegal(String::new()), String::new())
+                    Token::new(TokenType::Illegal(String::new()), self.ch.to_string())
                 }
             }
             };
@@ -53,6 +70,35 @@ impl Lexer {
 
         self.read_char();
         tok
+    } */
+
+    pub fn next_token(&mut self) -> TokenType {
+        self.skip_whitespace();
+
+        let tt = match look_up_token(&self.ch.to_string()) {
+            Some(e) => e,
+            None => {
+                if Lexer::is_char(&self.ch) {
+                    let literal = self.read_identifier();
+                    let kw = match look_up_keyword(&literal) {
+                        Some(kw) => {
+                            match kw {
+                                Keyword::Function => TokenType::Function,
+                                Keyword::Let => TokenType::Let,
+                            }
+                        },
+                        None => TokenType::Ident(literal),
+                    };
+                    kw
+                } else if Lexer::is_digit(&self.ch) {
+                    TokenType::Int(self.read_number())
+                } else {
+                    TokenType::Illegal(self.ch.to_string())
+                }
+            }
+        };
+        self.read_char();
+        tt
     }
 
     fn is_letter(ch: &u8) -> bool {
@@ -69,7 +115,36 @@ impl Lexer {
         while Self::is_char(&self.ch) {
             self.read_char(); 
         }
-        String::from_utf8(self.input[position..self.position].to_vec()).expect("Unable to create String")
+        println!("Identifier read: {} to {}", position, self.position);
+        String::from_utf8(self.input[position..self.position]
+            .to_vec())
+            .expect("Unable to create String from Identifier")
+    }
+
+    fn skip_whitespace(&mut self) {
+        println!("nom whitespace");
+        while self.ch == ' ' || self.ch == '\t' || self.ch == '\n' || self.ch == '\r' {
+            self.read_char();
+        } 
+    }
+
+    fn read_number(&mut self) -> i32 {
+        let position = self.position;
+        while Lexer::is_digit(&self.ch) {
+            self.read_char();
+        }
+
+        println!("Making int\nposition: {} to {}\n{}", position, self.position, String::from_utf8(self.input[position..self.position].to_vec()).unwrap());
+        
+        String::from_utf8(self.input[position..self.position]
+            .to_vec())
+            .expect("Unable to create String from Digit")
+            .parse::<i32>()
+            .expect("Unable to parse int")
+    }
+
+    fn is_digit(byte: &char) -> bool {
+        '0' <= *byte && *byte <= '9'
     }
 }
 
@@ -81,7 +156,7 @@ mod tests {
     fn next_token_test() {
         let input = "=+(){},;".as_bytes().to_vec();
         
-        let tests: Vec<Token> = vec![
+        let _tests: Vec<Token> = vec![
             Token {tokentype: TokenType::Assign, literal: "=".to_string()},
             Token {tokentype: TokenType::Plus, literal: "+".to_string()},
             Token {tokentype: TokenType::Lparen, literal: "(".to_string()},
@@ -91,6 +166,18 @@ mod tests {
             Token {tokentype: TokenType::Comma, literal: ",".to_string()},
             Token {tokentype: TokenType::Semicolon, literal: ";".to_string()},
             Token {tokentype: TokenType::EOF, literal: "EOF".to_string()},
+        ];
+
+        let tests: Vec<TokenType> = vec![
+            TokenType::Assign,
+            TokenType::Plus,
+            TokenType::Lparen,
+            TokenType::Rparen,
+            TokenType::Lbrace,
+            TokenType::Rbrace,
+            TokenType::Comma,
+            TokenType::Semicolon,
+            TokenType::EOF,
         ];
 
         let mut l = Lexer::new(input);
@@ -115,7 +202,7 @@ mod tests {
         
         let result = add(five, ten);".as_bytes().to_vec();
 
-        let tests: Vec<Token> = vec![
+        let _tests: Vec<Token> = vec![
             Token::new(TokenType::Let, "let".to_string()),
             Token::new(TokenType::Ident("five".to_string()), "five".to_string()),
             Token::new(TokenType::Assign, "=".to_string()),
@@ -155,6 +242,54 @@ mod tests {
             Token::new(TokenType::EOF, "EOF".to_string()),
         ];
 
+        let tests: Vec<TokenType> = vec![
+            TokenType::Let,
+            TokenType::Ident("five".to_string()),
+            TokenType::Assign,
+            TokenType::Int(5),
+            TokenType::Semicolon,
+            TokenType::Let,
+            TokenType::Ident("ten".to_string()),
+            TokenType::Assign,
+            TokenType::Int(10),
+            TokenType::Semicolon,
+            TokenType::Let,
+            TokenType::Ident("add".to_string()),
+            TokenType::Assign,
+            TokenType::Function,
+            TokenType::Lparen,
+            TokenType::Ident("x".to_string()),
+            TokenType::Comma,
+            TokenType::Ident("y".to_string()),
+            TokenType::Rparen,
+            TokenType::Lbrace,
+            TokenType::Ident("x".to_string()),
+            TokenType::Plus,
+            TokenType::Ident("y".to_string()),
+            TokenType::Semicolon,
+            TokenType::Rbrace,
+            TokenType::Semicolon,
+            TokenType::Let,
+            TokenType::Ident("result".to_string()),
+            TokenType::Assign,
+            TokenType::Ident("add".to_string()),
+            TokenType::Lparen, 
+            TokenType::Ident("five".to_string()),
+            TokenType::Comma, 
+            TokenType::Ident("ten".to_string()),
+            TokenType::Rparen, 
+            TokenType::Semicolon,
+            TokenType::EOF,
+        ];
+        
+        let mut l = Lexer::new(input);
+
+        for t in tests.into_iter() {
+            let tok = l.next_token();
+            println!("lexer: {:?}", tok);
+            println!("test: {:?}\n", t);
+            assert_eq!(tok, t);
+        }
     
     }
 }
